@@ -5,12 +5,12 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
-from ansible_collections.azure.azcollection.plugins.module_utils.azure_rm_common import AzureRMModuleBase
 __metaclass__ = type
+
 
 DOCUMENTATION = '''
 ---
-module: azure_rm_webapp_accessrestriction_info
+module: azure_rm_webappaccessrestriction_info
 version_added: "1.9.0"
 short_description: Retrieve web app network access restriction facts
 description:
@@ -36,7 +36,7 @@ author:
 
 EXAMPLES = '''
     - name: View web app access restrictions.
-      azure.azcollection.azure_rm_webapp_accessrestriction_info:
+      azure.azcollection.azure_rm_webappaccessrestriction_info:
         name: "MyWebapp"
         resource_group: "MyResourceGroup"
 '''
@@ -47,6 +47,7 @@ ip_security_restrictions:
         - The web app's HTTP access restrictions.
     returned: always
     type: list
+    elements: dict
     contains:
         name:
             description:
@@ -83,6 +84,7 @@ scm_ip_security_restrictions:
         - The web app's SCM access restrictions.
     returned: always
     type: list
+    elements: dict
     contains:
         name:
             description:
@@ -121,6 +123,9 @@ scm_ip_security_restrictions_use_main:
     type: bool
     sample: false
 '''
+
+from ansible_collections.azure.azcollection.plugins.module_utils.azure_rm_common import AzureRMModuleBase
+
 
 class AzureRMWebAppAccessRestrictionInfo(AzureRMModuleBase):
 
@@ -181,8 +186,10 @@ class AzureRMWebAppAccessRestrictionInfo(AzureRMModuleBase):
             ip_address=restriction_obj.ip_address,
         )
 
+
 def main():
     AzureRMWebAppAccessRestrictionInfo()
+
 
 if __name__ == '__main__':
     main()

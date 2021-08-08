@@ -5,13 +5,12 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
-from inspect import signature
-from ansible_collections.azure.azcollection.plugins.module_utils.azure_rm_common import AzureRMModuleBase
 __metaclass__ = type
+
 
 DOCUMENTATION = '''
 ---
-module: azure_rm_webapp_accessrestriction
+module: azure_rm_webappaccessrestriction
 version_added: "1.9.0"
 short_description: Manage web app network access restrictions
 description:
@@ -39,6 +38,7 @@ options:
         description:
             - The web app's HTTP access restrictions.
         type: list
+        elements: dict
         suboptions:
             name:
                 description:
@@ -68,8 +68,11 @@ options:
                 required: true
     scm_ip_security_restrictions:
         description:
-            - The web app's SCM access restrictions. If C(scm_ip_security_restrictions_use_main) is set to C(true), the SCM restrictions will be configured but not used.
+            - >-
+                The web app's SCM access restrictions. If C(scm_ip_security_restrictions_use_main) is set to C(true),
+                the SCM restrictions will be configured but not used.
         type: list
+        elements: dict
         suboptions:
             name:
                 description:
@@ -99,7 +102,9 @@ options:
                 required: true
     scm_ip_security_restrictions_use_main:
         description:
-            - Set to C(true) to have the HTTP access restrictions also apply to the SCM site. If C(scm_ip_security_restrictions) are also applied, they will configured but not used.
+            - >-
+                Set to C(true) to have the HTTP access restrictions also apply to the SCM site.
+                If C(scm_ip_security_restrictions) are also applied, they will configured but not used.
         default: false
         type: bool
 
@@ -112,7 +117,7 @@ author:
 
 EXAMPLES = '''
     - name: Configure web app access restrictions.
-      azure.azcollection.azure_rm_webapp_accessrestriction:
+      azure.azcollection.azure_rm_webappaccessrestriction:
         name: "MyWebapp"
         resource_group: "MyResourceGroup"
         ip_security_restrictions:
@@ -127,7 +132,7 @@ EXAMPLES = '''
         scm_ip_security_restrictions_use_main: true
 
     - name: Delete web app network access restrictions.
-      azure.azcollection.azure_rm_webapp_accessrestriction:
+      azure.azcollection.azure_rm_webappaccessrestriction:
         name: "MyWebapp"
         resource_group: "MyResourceGroup"
         state: "absent"
@@ -139,6 +144,7 @@ ip_security_restrictions:
         - The web app's HTTP access restrictions.
     returned: always
     type: list
+    elements: dict
     contains:
         name:
             description:
@@ -175,6 +181,7 @@ scm_ip_security_restrictions:
         - The web app's SCM access restrictions.
     returned: always
     type: list
+    elements: dict
     contains:
         name:
             description:
@@ -214,6 +221,8 @@ scm_ip_security_restrictions_use_main:
     sample: false
 '''
 
+from ansible_collections.azure.azcollection.plugins.module_utils.azure_rm_common import AzureRMModuleBase
+
 try:
     from azure.mgmt.web.models import IpSecurityRestriction
 except Exception:
@@ -227,6 +236,7 @@ ip_restriction_spec = dict(
     priority=dict(type='int', required=True),
     ip_address=dict(type='str', required=True),
 )
+
 
 class AzureRMWebAppAccessRestriction(AzureRMModuleBase):
 
@@ -300,14 +310,15 @@ class AzureRMWebAppAccessRestriction(AzureRMModuleBase):
 
     def get_updated_config(self, site_config):
         site_config.ip_security_restrictions = [] if not self.ip_security_restrictions else self.to_restriction_obj_list(self.ip_security_restrictions)
-        site_config.scm_ip_security_restrictions = [] if not self.scm_ip_security_restrictions else self.to_restriction_obj_list(self.scm_ip_security_restrictions)
+        site_config.scm_ip_security_restrictions = [] if not self.scm_ip_security_restrictions else (
+            self.to_restriction_obj_list(self.scm_ip_security_restrictions))
         site_config.scm_ip_security_restrictions_use_main = self.scm_ip_security_restrictions_use_main
         return site_config
 
     def has_updates(self, site_config):
         return (self.ip_security_restrictions != self.to_restriction_dict_list(site_config.ip_security_restrictions)
-            or self.scm_ip_security_restrictions != self.to_restriction_dict_list(site_config.scm_ip_security_restrictions)
-            or site_config.scm_ip_security_restrictions_use_main != self.scm_ip_security_restrictions_use_main)
+                or self.scm_ip_security_restrictions != self.to_restriction_dict_list(site_config.scm_ip_security_restrictions)
+                or site_config.scm_ip_security_restrictions_use_main != self.scm_ip_security_restrictions_use_main)
 
     def has_access_restrictions(self, site_config):
         return site_config.ip_security_restrictions or site_config.scm_ip_security_restrictions
@@ -357,8 +368,10 @@ class AzureRMWebAppAccessRestriction(AzureRMModuleBase):
             ip_address=restriction_obj.ip_address,
         )
 
+
 def main():
     AzureRMWebAppAccessRestriction()
+
 
 if __name__ == '__main__':
     main()
