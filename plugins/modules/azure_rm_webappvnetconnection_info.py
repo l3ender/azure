@@ -12,7 +12,7 @@ DOCUMENTATION = '''
 ---
 module: azure_rm_webappvnetconnection_info
 
-version_added: "1.9.0"
+version_added: "1.8.0"
 
 short_description: Get Azure web app virtual network connection facts
 
@@ -111,6 +111,7 @@ class AzureRMWebAppVnetConnectionInfo(AzureRMModuleBase):
         self.resource_group = None
 
         super(AzureRMWebAppVnetConnectionInfo, self).__init__(self.module_arg_spec,
+                                                              supports_check_mode=True,
                                                               supports_tags=False,
                                                               facts_module=True)
 
